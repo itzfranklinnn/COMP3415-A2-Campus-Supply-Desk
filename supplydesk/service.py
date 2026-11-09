@@ -91,6 +91,13 @@ class OrderService:
             "delivery_cents": delivery,
             "total_cents": subtotal - discount + delivery,
         }
+    
+    def _deduct_stock(self, state, lines):
+        """Reduce available stock for the ordered items."""
+        for line in lines:
+            for product in state["catalog"]:
+                if product["product_id"] == line["product_id"]:
+                    product["stock"] -= line["quantity"]
 
     def place_order(self, customer_type, items, fulfillment="pickup"):
         state = self.store.load()
@@ -120,10 +127,9 @@ class OrderService:
             "delivery_cents": delivery,
             "total_cents": subtotal - discount + delivery,
         }
-        for line in lines:
-            for product in state["catalog"]:
-                if product["product_id"] == line["product_id"]:
-                    product["stock"] -= line["quantity"]
+        
+        self._deduct_stock(state, lines)
+
         state["next_order_number"] += 1
         state["orders"].append(order)
         self.store.save(state)
