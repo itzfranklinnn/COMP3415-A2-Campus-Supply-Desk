@@ -9,6 +9,8 @@ ROUNDING_OFFSET = 50
 FREE_DELIVERY_THRESHOLD_CENTS = 10000
 DELIVERY_FEE_CENTS = 600
 
+EXPRESS_DELIVERY_FEE_CENTS = 1200
+
 
 class OrderService:
     def __init__(self, state_path=".supplydesk/state.json"):
@@ -68,8 +70,8 @@ class OrderService:
         state = self.store.load()
         if customer_type not in ("regular", "student"):
             raise ValueError("Customer type must be regular or student.")
-        if fulfillment not in ("pickup", "delivery"):
-            raise ValueError("Fulfillment must be pickup or delivery.")
+        if fulfillment not in ("pickup", "delivery", "express"):
+            raise ValueError("Fulfillment must be pickup, delivery or express.")
         if not isinstance(items, list) or not items:
             raise ValueError("An order must contain at least one item.")
         
@@ -80,7 +82,9 @@ class OrderService:
         if customer_type == "student" and subtotal > STUDENT_DISCOUNT_THRESHOLD_CENTS:
             discount = (subtotal * STUDENT_DISCOUNT_PERCENT + ROUNDING_OFFSET) // PERCENT_DENOMINATOR
         delivery = 0
-        if (fulfillment == "delivery" and subtotal - discount < FREE_DELIVERY_THRESHOLD_CENTS):
+        if fulfillment == "express":
+            delivery = EXPRESS_DELIVERY_FEE_CENTS
+        elif (fulfillment == "delivery" and subtotal - discount < FREE_DELIVERY_THRESHOLD_CENTS):
             delivery = DELIVERY_FEE_CENTS
         return {
             "customer_type": customer_type,
@@ -103,8 +107,8 @@ class OrderService:
         state = self.store.load()
         if customer_type not in ("regular", "student"):
             raise ValueError("Customer type must be regular or student.")
-        if fulfillment not in ("pickup", "delivery"):
-            raise ValueError("Fulfillment must be pickup or delivery.")
+        if fulfillment not in ("pickup", "delivery", "express"):
+            raise ValueError("Fulfillment must be pickup, delivery or express.")
         if not isinstance(items, list) or not items:
             raise ValueError("An order must contain at least one item.")
         
@@ -114,7 +118,9 @@ class OrderService:
         if customer_type == "student" and subtotal > STUDENT_DISCOUNT_THRESHOLD_CENTS:
             discount = (subtotal * STUDENT_DISCOUNT_PERCENT + ROUNDING_OFFSET) // PERCENT_DENOMINATOR
         delivery = 0
-        if fulfillment == "delivery" and subtotal - discount < FREE_DELIVERY_THRESHOLD_CENTS:
+        if fulfillment == "express":
+            delivery = EXPRESS_DELIVERY_FEE_CENTS
+        elif (fulfillment == "delivery" and subtotal - discount < FREE_DELIVERY_THRESHOLD_CENTS):
             delivery = DELIVERY_FEE_CENTS
         order = {
             "order_id": "ORD-" + str(state["next_order_number"]).zfill(4),

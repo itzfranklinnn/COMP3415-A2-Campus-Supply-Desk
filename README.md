@@ -214,3 +214,31 @@ These commands use the same orders and stock as the interactive menu opened with
 python -m supplydesk --help
 python -m supplydesk quote --help
 ```
+
+
+## Express Delivery (CR-01)
+
+Campus Supply Desk now supports three fulfillment options:
+
+- `pickup`: Free.
+- `delivery`: Costs $6.00 unless the discounted merchandise subtotal is at least $100.00.
+- `express`: Always costs $12.00, regardless of the order total.
+
+Express delivery is available when requesting quotes and placing orders through the interactive menu or command line.
+
+### Example
+
+Run this command:
+
+```sh
+python -m supplydesk quote --customer student --fulfillment express --item hoodie:2
+```
+
+Expected results:
+
+- Subtotal: $80.00
+- Student discount: $8.00
+- Express delivery: $12.00
+- Total: $84.00
+
+Express delivery does not change the existing pickup and standard delivery rules.
